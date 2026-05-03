@@ -1,0 +1,30 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true   # v8 also accepts "auto"; "true" forces upload
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+      - name: Lint (ruff check)
+        run: uv run ruff check .
+      - name: Format check (ruff format --check)
+        run: uv run ruff format --check .
+      - name: Type check (mypy)
+        run: uv run mypy .
+      - name: Test (pytest)
+        run: uv run pytest

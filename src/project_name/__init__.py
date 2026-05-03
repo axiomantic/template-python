@@ -1,0 +1,3 @@
+"""PROJECT_NAME - PROJECT DESCRIPTION HERE."""
+
+__version__ = "0.0.1"

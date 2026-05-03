@@ -1,0 +1,40 @@
+name: Auto Tag
+on:
+  push:
+    branches: [main]
+    paths: [pyproject.toml]
+permissions:
+  contents: write
+jobs:
+  tag:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract version from [project] table
+        id: ver
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import re, pathlib, sys
+          text = pathlib.Path("pyproject.toml").read_text()
+          # Locate the [project] section, then the first version line within it
+          m = re.search(r'^\[project\]\s*$(.*?)(?=^\[|\Z)', text, re.M | re.S)
+          if not m:
+              sys.exit("no [project] table")
+          v = re.search(r'^version\s*=\s*"([^"]+)"', m.group(1), re.M)
+          if not v:
+              sys.exit("no version in [project] table")
+          print(f"version={v.group(1)}")
+          PY
+      - name: Tag if not exists
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          git rev-parse "v$VERSION" >/dev/null 2>&1 && { echo "Tag v$VERSION exists"; exit 0; }
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"

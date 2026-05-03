@@ -1,0 +1,73 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+  id-token: write   # OIDC for PyPI trusted publishing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v8
+        with: { enable-cache: true }
+      - run: uv build
+      - uses: actions/upload-artifact@v4
+        with: { name: dist, path: dist/ }
+
+  pypi-existence-check:
+    # NOTE: This is an EXISTENCE CHECK only — it answers "does this project name
+    # already have any release on PyPI?" It does NOT verify that a trusted
+    # publisher is configured for this repo. Trusted-publisher misconfiguration
+    # surfaces as a loud failure on the `pypi-publish` step below, which prints
+    # a setup URL via `if: failure()`.
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      first_publish: ${{ steps.check.outputs.first_publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        name: Check PyPI metadata existence
+        run: |
+          PROJECT_NAME=$(awk -F'"' '/^name = / {print $2; exit}' pyproject.toml)
+          if curl -sf "https://pypi.org/pypi/${PROJECT_NAME}/json" >/dev/null; then
+            echo "first_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "first_publish=true"  >> "$GITHUB_OUTPUT"
+            echo "::notice::Project '${PROJECT_NAME}' has no PyPI history. First publish requires a trusted publisher to be configured: https://pypi.org/manage/account/publishing/"
+          fi
+
+  pypi-publish:
+    needs: [build, pypi-existence-check]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist/ }
+      - id: publish
+        uses: pypa/gh-action-pypi-publish@release/v1   # versioned-branch ref, stays valid
+        with:
+          attestations: true
+      - if: failure()
+        name: Trusted-publisher setup hint
+        run: |
+          PROJECT_NAME=$(grep -m1 '^name = ' pyproject.toml | cut -d'"' -f2)
+          echo "::error::PyPI publish failed. If first release, configure trusted publisher at:"
+          echo "::error::https://pypi.org/manage/account/publishing/"
+          echo "::error::Use these values: Owner=axiomantic  Repository=$GITHUB_REPOSITORY  Workflow=release.yml  Environment=pypi"
+
+  github-release:
+    needs: pypi-publish
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist/ }
+      - uses: softprops/action-gh-release@v3
+        with: { files: dist/* }

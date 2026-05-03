@@ -1,0 +1,130 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "project-name"
+version = "0.0.1"
+description = "PROJECT DESCRIPTION HERE"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Axiomantic" }]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    "pre-commit>=3.2.0",          # 3.2 introduced the per-stage default_install_hook_types semantics we rely on
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+]
+
+[project.urls]
+Homepage = "https://github.com/axiomantic/project-name"
+Issues = "https://github.com/axiomantic/project-name/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/project_name"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# Maximalist — opt out per-file-ignore rather than opt in.
+select = [
+    "E", "W",       # pycodestyle
+    "F",            # pyflakes
+    "I",            # isort
+    "N",            # pep8-naming
+    "D",            # pydocstyle
+    "UP",           # pyupgrade
+    "ANN",          # flake8-annotations
+    "S",            # flake8-bandit
+    "B",            # flake8-bugbear
+    "A",            # flake8-builtins
+    "C4",           # flake8-comprehensions
+    "DTZ",          # flake8-datetimez
+    "T10",          # flake8-debugger
+    "EM",           # flake8-errmsg
+    "FA",           # flake8-future-annotations
+    "ISC",          # flake8-implicit-str-concat
+    "ICN",          # flake8-import-conventions
+    "G",            # flake8-logging-format
+    "INP",          # flake8-no-pep420
+    "PIE",          # flake8-pie
+    "T20",          # flake8-print
+    "PT",           # flake8-pytest-style
+    "Q",            # flake8-quotes
+    "RSE",          # flake8-raise
+    "RET",          # flake8-return
+    "SLF",          # flake8-self
+    "SIM",          # flake8-simplify
+    "TID",          # flake8-tidy-imports
+    "TCH",          # flake8-type-checking
+    "ARG",          # flake8-unused-arguments
+    "PTH",          # flake8-use-pathlib
+    "ERA",          # eradicate (commented-out code)
+    "PL",           # pylint
+    "TRY",          # tryceratops
+    "FLY",          # flynt
+    "PERF",         # perflint
+    "RUF",          # ruff-specific
+]
+ignore = [
+    "D203",         # one-blank-line-before-class (conflicts with D211)
+    "D213",         # multi-line-summary-second-line (conflicts with D212)
+    "ISC001",       # conflicts with formatter
+    "COM812",       # conflicts with formatter (trailing comma)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = [
+    "S101",         # asserts allowed in tests
+    "D",            # docstrings not required in tests
+    "ANN",          # annotations not required in tests
+    "PT011",        # pytest.raises without `match` allowed in smoke tests
+    "PLR2004",      # magic numbers allowed in tests
+    "SLF001",       # private member access allowed in tests
+]
+"src/*/__init__.py" = [
+    "D104",         # missing docstring in public package
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+suppress-dummy-args = true   # don't flag *args / **kwargs annotations as missing
+mypy-init-return = true
+
+[tool.ruff.lint.pylint]
+max-args = 8
+max-branches = 14
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+warn_redundant_casts = true
+warn_unused_configs = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --cov=project_name --cov-report=term-missing"
+testpaths = ["tests"]
