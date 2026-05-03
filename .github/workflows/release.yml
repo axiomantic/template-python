@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v8.1.0   # No floating v8 major-tag; pin to specific patch
         with: { enable-cache: true }
       - run: uv build
@@ -28,7 +28,7 @@ jobs:
     outputs:
       first_publish: ${{ steps.check.outputs.first_publish }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: check
         name: Check PyPI metadata existence
         run: |
@@ -47,7 +47,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with: { name: dist, path: dist/ }
       - id: publish
