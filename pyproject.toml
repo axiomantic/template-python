@@ -24,7 +24,7 @@ dev = [
     "mypy>=1.10",
     "ruff>=0.5",
     "pre-commit>=3.2.0",          # 3.2 introduced the per-stage default_install_hook_types semantics we rely on
-    "mkdocs-material>=9.5",
+    "mkdocs-material>=9.7.6",
     "mkdocstrings[python]>=0.25",
 ]
 
