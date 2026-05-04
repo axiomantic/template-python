@@ -13,7 +13,7 @@ jobs:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v8
+      - uses: astral-sh/setup-uv@v8.1.0   # No floating v8 major-tag; pin to specific patch
         with:
           enable-cache: true   # v8 also accepts "auto"; "true" forces upload
       - name: Set up Python ${{ matrix.python-version }}
