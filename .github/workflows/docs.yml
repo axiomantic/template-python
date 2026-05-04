@@ -10,11 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - name: Install mkdocs (python variant)
-        run: pip install mkdocs-material 'mkdocstrings[python]'
+      - uses: astral-sh/setup-uv@v8.1.0   # No floating v8 major-tag; pin to specific patch
+        with: { enable-cache: true }
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install project + docs deps
+        # mkdocstrings[python] imports the project to extract docstrings, so the
+        # project itself must be installed (editable). `uv sync --all-extras --dev`
+        # gets mkdocs-material, mkdocstrings[python], and the project together.
+        run: uv sync --all-extras --dev
       - name: Build
-        run: mkdocs build --strict
+        run: uv run mkdocs build --strict
       - name: Deploy to gh-pages
-        run: mkdocs gh-deploy --force
+        run: uv run mkdocs gh-deploy --force
