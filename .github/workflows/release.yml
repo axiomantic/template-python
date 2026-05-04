@@ -48,7 +48,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: dist, path: dist/ }
       - id: publish
         uses: pypa/gh-action-pypi-publish@release/v1   # versioned-branch ref, stays valid
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: { contents: write }
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: dist, path: dist/ }
       - uses: softprops/action-gh-release@v3
         with: { files: dist/* }
