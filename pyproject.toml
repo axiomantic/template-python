@@ -23,7 +23,7 @@ dev = [
     "pytest-cov>=5",
     "mypy>=2.3.0",
     "ruff>=0.17.3",
-    "pre-commit>=4.6.0",          # 3.2 introduced the per-stage default_install_hook_types semantics we rely on
+    "pre-commit>=4.7.0",          # 3.2 introduced the per-stage default_install_hook_types semantics we rely on
     "mkdocs-material>=9.8.0",
     "mkdocstrings[python]>=1.0.4",
 ]
